@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   postgres:
+    container_name: dbl_postgres
     image: postgres
     restart: always
     volumes:
@@ -12,6 +13,7 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
 
   rabbitmq:
+    container_name: dbl_rabbitmq
     image: rabbitmq:management
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
@@ -22,17 +24,17 @@ services:
       timeout: 10s
       retries: 10
     ports:
-      - "5672:5672"
       - "15672:15672"
     depends_on:
       - postgres
 
   api:
+    container_name: dbl_api
     build: api
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=${POSTGRES_SCHEMA}
     ports:
-      - "18080:8080"
+      - "${API_PORT}:8080"
     links:
       - rabbitmq
       - postgres
@@ -44,6 +46,7 @@ services:
     restart: always
 
   runtime:
+    container_name: dbl_runtime
     build: runtime
     environment:
       - USE_RABBITMQ=true
