@@ -1,3 +1,6 @@
 [submodule "runtime"]
 	path = runtime
 	url = git@github.com:Discord-Build-Logger/Runtime.git
+[submodule "api"]
+	path = api
+	url = git@github.com:Discord-Build-Logger/api.git
