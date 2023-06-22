@@ -17,10 +17,10 @@ services:
       - rabbitmq-data:/var/lib/rabbitmq
       - rabbitmq-config:/etc/rabbitmq/rabbitmq.conf
     healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 30s
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
       timeout: 10s
-      retries: 5
+      retries: 10
     ports:
       - "5672:5672"
       - "15672:15672"
@@ -37,20 +37,28 @@ services:
       - rabbitmq
       - postgres
     depends_on:
-      - rabbitmq
-      - postgres
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
     restart: always
 
   runtime:
     build: runtime
     environment:
+      - USE_RABBITMQ=true
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?schema=${POSTGRES_SCHEMA}
+      - INTERNAL_BUILD_GRABBER_URL=${INTERNAL_BUILD_GRABBER_URL}
+      - INTERNAL_BUILD_GRABBER_AUTH=${INTERNAL_BUILD_GRABBER_AUTH}
     links:
       - rabbitmq
       - postgres
     depends_on:
-      - rabbitmq
-      - postgres
+      postgres:
+        condition: service_started
+      rabbitmq:
+        condition: service_healthy
+    restart: always
 
 volumes:
   postgres-data:
